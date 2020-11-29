@@ -132,7 +132,8 @@
     if (typeof signThis === "string") {
       return await sign(signThis, getKeys().prvKey)
     } else {
-      return await sign(JSON.stringify(), getKeys().prvKey)
+      return await sign(JSON.stringify(signThis), getKeys().prvKey)
+    }
   }
   export {generate, sign, verify, getSig}
   
