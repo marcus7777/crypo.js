@@ -120,4 +120,19 @@
     }
     return hexCodes.join('')
   }
-  export {generate,sign,verify}
+  async function getKeys(cb = console.log) {
+    if (!localStorage.prvKey) {
+      await generate(p => {localStorage.prvKey = p}, p => {localStorage.pubKey = p})
+      cb(localStorage.prvKey, localStorage.pubKey)
+    }
+    let {prvKey,pubKey} = localStorage
+    return {prvKey,pubKey}
+  }
+  async function getSig(signThis){
+    if (typeof signThis === "string") {
+      return await sign(signThis, getKeys().prvKey)
+    } else {
+      return await sign(JSON.stringify(), getKeys().prvKey)
+  }
+  export {generate, sign, verify, getSig}
+  
