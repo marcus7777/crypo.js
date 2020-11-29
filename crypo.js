@@ -1,3 +1,4 @@
+ 
 
   function importKey (KeyAsJson, cb) {
     var key = JSON.parse(KeyAsJson)
@@ -36,7 +37,7 @@
     return new Uint8Array([...asciiString].map(char => char.charCodeAt(0)))
   }
   
-  function sign (string, privateKey, cb) {
+  function sign (string, privateKey, cb = console.log) {
     var data = str2ab(string)
 
     return importKey(privateKey, function (key, regx) {
@@ -63,7 +64,7 @@
     })
   }
 
-  function exportKey (Key, cb) {
+  function exportKey (Key, cb = console.log) {
     return window.crypto.subtle.exportKey('jwk', Key).then(function (keydata) {
       const key = JSON.stringify(keydata)
       cb(key)
@@ -87,7 +88,7 @@
       console.error(e)
     })
   }
-  function verify (string, signature, publicKey, cb) {
+  function verify (string, signature, publicKey, cb = console.log) {
     var data = str2ab(string)
     importKey(publicKey, function (key) {
       window.crypto.subtle.verify({name: 'ECDSA', hash: {name: 'SHA-256'}}, key, base64ToArrayBuffer(signature), data).then(function (isvalid) {
@@ -128,11 +129,12 @@
     let {prvKey,pubKey} = localStorage
     return {prvKey,pubKey}
   }
-  async function getSig(signThis){
+  async function getSig(signThis, cb){
+    let keys = await getKeys()
     if (typeof signThis === "string") {
-      return await sign(signThis, getKeys().prvKey)
+      return await sign(signThis, keys.prvKey, cb)
     } else {
-      return await sign(JSON.stringify(signThis), getKeys().prvKey)
+      return await sign(JSON.stringify(signThis), keys.prvKey, cb)
     }
   }
   export {generate, sign, verify, getSig}
