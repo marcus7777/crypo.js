@@ -35,7 +35,7 @@ function arrayToBase64String (ab) {
 }
 
 function base64ToArrayBuffer (s) {
-  let asciiString = atob(s)
+  let asciiString = Atob(s)
   return new Uint8Array([...asciiString].map(char => char.charCodeAt(0)))
 }
   
