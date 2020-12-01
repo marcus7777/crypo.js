@@ -1,5 +1,9 @@
 const Crypto = typeof window !== 'undefined' ? crypto : require('crypto').webcrypto
 const Atob =   typeof window !== 'undefined' ? atob : require('atob')
+const Btoa =   typeof btoa !== 'undefined'   ? btoa : function (str) {
+  return new Buffer(str, 'binary').toString('base64');
+}
+
 // const Btoa =   typeof window !== 'undefined' ? btoa : require('btoa')
 
 function importKey (KeyAsJson, cb) {
