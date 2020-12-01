@@ -133,7 +133,7 @@ function hex (buffer) {
 }
 
 export {generate, sign, verify}
-
+let getSig
 if (typeof localStorage === 'undefined') {
   async function getKeys(cb = console.log) {
     if (!localStorage.prvKey) {
@@ -143,7 +143,7 @@ if (typeof localStorage === 'undefined') {
     let {prvKey,pubKey} = localStorage
     return {prvKey,pubKey}
   }
-  async function getSig(signThis, cb){
+  getSig = async function(signThis, cb){
     let keys = await getKeys()
     if (typeof signThis === "string") {
       return await sign(signThis, keys.prvKey, cb)
@@ -152,7 +152,7 @@ if (typeof localStorage === 'undefined') {
     }
   }
 } else {
-  function getSig() {
+  getSig = function() {
     console.log("no localStorage")
   }
 }
