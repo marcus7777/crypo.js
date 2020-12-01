@@ -1,6 +1,6 @@
 if (!window) {
-  const atob = require('atob');
-  const crypto = require('crypto');
+  const atob = require('atob')
+  const crypto = require('crypto').webcrypto
 }
   function importKey (KeyAsJson, cb) {
     var key = JSON.parse(KeyAsJson)
