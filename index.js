@@ -1,10 +1,12 @@
- 
-
+if (!window) {
+  const atob = require('atob');
+  const crypto = require('crypto');
+}
   function importKey (KeyAsJson, cb) {
     var key = JSON.parse(KeyAsJson)
     var hard = key.hard ? new RegExp(key.hard, 'g') : ''
 
-    return window.crypto.subtle.importKey('jwk', key, {name: 'ECDSA', namedCurve: 'P-256'}, false, key.key_ops).then(function (key) {
+    return crypto.subtle.importKey('jwk', key, {name: 'ECDSA', namedCurve: 'P-256'}, false, key.key_ops).then(function (key) {
       return cb(key, hard)
     }).then(function (ret) {
       return ret
@@ -29,11 +31,11 @@
     var arr1 = arr.map(function (item) {
       return String.fromCharCode(item)    // Convert
     })
-    return window.btoa(arr1.join(''))  // Form a string
+    return btoa(arr1.join(''))  // Form a string
   }
 
   function base64ToArrayBuffer (s) {
-    var asciiString = window.atob(s)
+    var asciiString = atob(s)
     return new Uint8Array([...asciiString].map(char => char.charCodeAt(0)))
   }
   
@@ -42,14 +44,14 @@
 
     return importKey(privateKey, function (key, regx) {
       if (!regx) {
-        return window.crypto.subtle.sign({name: 'ECDSA', hash: {name: 'SHA-256'}}, key, data).then(function (signature) {
+        return crypto.subtle.sign({name: 'ECDSA', hash: {name: 'SHA-256'}}, key, data).then(function (signature) {
           return cb(arrayToBase64String(signature))
         }).catch(function (e) {
           console.error(e)
         })
       } else {
         var doWork = function () {
-          var work = window.crypto.subtle.sign({name: 'ECDSA', hash: {name: 'SHA-256'}}, key, data)
+          var work = crypto.subtle.sign({name: 'ECDSA', hash: {name: 'SHA-256'}}, key, data)
           return work.then(function (signature) {
             var sig = arrayToBase64String(signature)
             if (regx.test(sig)) {
@@ -65,7 +67,7 @@
   }
 
   function exportKey (Key, cb = console.log) {
-    return window.crypto.subtle.exportKey('jwk', Key).then(function (keydata) {
+    return crypto.subtle.exportKey('jwk', Key).then(function (keydata) {
       const key = JSON.stringify(keydata)
       cb(key)
       return key
@@ -75,7 +77,7 @@
   }
   function generate (privateKeyCB, publicKeyCB) {
     var keys = {}
-    return window.crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256'}, true, ['sign', 'verify']).then(function (key) {
+    return crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256'}, true, ['sign', 'verify']).then(function (key) {
       return exportKey(key.privateKey, privateKeyCB).then(function (privateKey) {
         keys.privateKey = privateKey
         return exportKey(key.publicKey, publicKeyCB).then(function (publicKey) {
@@ -91,7 +93,7 @@
   function verify (string, signature, publicKey, cb = console.log) {
     var data = str2ab(string)
     importKey(publicKey, function (key) {
-      window.crypto.subtle.verify({name: 'ECDSA', hash: {name: 'SHA-256'}}, key, base64ToArrayBuffer(signature), data).then(function (isvalid) {
+      crypto.subtle.verify({name: 'ECDSA', hash: {name: 'SHA-256'}}, key, base64ToArrayBuffer(signature), data).then(function (isvalid) {
       // returns a boolean on whether the signature is true or not
         cb(isvalid)
       }).catch(function (e) {
@@ -106,36 +108,35 @@
     })
   }
 
-  function hex (buffer) {
-    var hexCodes = []
-    var view = new DataView(buffer)
-    for (var i = 0; i < view.byteLength; i += 4) {
-    // Using getUint32 reduces the number of iterations needed (we process 4 bytes each time)
-      var value = view.getUint32(i)
+function hex (buffer) {
+  let hexCodes = []
+  let view = new DataView(buffer)
+  for (let i = 0; i < view.byteLength; i += 4) {
+  // Using getUint32 reduces the number of iterations needed (we process 4 bytes each time)
+    let value = view.getUint32(i)
     // toString(16) will give the hex representation of the number without padding
-      var stringValue = value.toString(16)
+    let stringValue = value.toString(16)
     // We use concatenation and slice for padding
-      var padding = '00000000'
-      var paddedValue = (padding + stringValue).slice(-padding.length)
-      hexCodes.push(paddedValue)
-    }
-    return hexCodes.join('')
+    let padding = '00000000'
+    let paddedValue = (padding + stringValue).slice(-padding.length)
+    hexCodes.push(paddedValue)
   }
-  async function getKeys(cb = console.log) {
-    if (!localStorage.prvKey) {
-      await generate(p => {localStorage.prvKey = p}, p => {localStorage.pubKey = p})
-      cb(localStorage.prvKey, localStorage.pubKey)
-    }
-    let {prvKey,pubKey} = localStorage
-    return {prvKey,pubKey}
+  return hexCodes.join('')
+}
+async function getKeys(cb = console.log) {
+  if (!localStorage.prvKey) {
+    await generate(p => {localStorage.prvKey = p}, p => {localStorage.pubKey = p})
+    cb(localStorage.prvKey, localStorage.pubKey)
   }
-  async function getSig(signThis, cb){
-    let keys = await getKeys()
-    if (typeof signThis === "string") {
-      return await sign(signThis, keys.prvKey, cb)
-    } else {
-      return await sign(JSON.stringify(signThis), keys.prvKey, cb)
-    }
+  let {prvKey,pubKey} = localStorage
+  return {prvKey,pubKey}
+}
+async function getSig(signThis, cb){
+  let keys = await getKeys()
+  if (typeof signThis === "string") {
+    return await sign(signThis, keys.prvKey, cb)
+  } else {
+    return await sign(JSON.stringify(signThis), keys.prvKey, cb)
   }
+}
   export {generate, sign, verify, getSig}
-  
