@@ -1,6 +1,6 @@
-const Crypto = crypto || require('crypto').webcrypto
-const Atob = atob || require('atob')
-const Btoa = btoa || require('btoa')
+const Crypto = typeof window !== 'undefined' ? crypto : require('crypto').webcrypto
+const Atob =   typeof window !== 'undefined' ? atob : require('atob')
+const Btoa =   typeof window !== 'undefined' ? btoa : require('btoa')
 
 function importKey (KeyAsJson, cb) {
   let key = JSON.parse(KeyAsJson)
