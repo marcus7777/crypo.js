@@ -134,7 +134,7 @@ function hex (buffer) {
 
 export {generate, sign, verify}
 let getSig
-if (typeof localStorage === 'undefined') {
+if (typeof localStorage !== 'undefined') {
   async function getKeys(cb = console.log) {
     if (!localStorage.prvKey) {
       await generate(p => {localStorage.prvKey = p}, p => {localStorage.pubKey = p})
