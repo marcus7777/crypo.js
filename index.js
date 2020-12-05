@@ -131,8 +131,11 @@ function hex (buffer) {
   }
   return hexCodes.join('')
 }
-
+if (module) {
+  module.exports = {generate, sign, verify}
+}
 export {generate, sign, verify}
+
 let getSig
 if (typeof localStorage !== 'undefined') {
   async function getKeys(cb = console.log) {
