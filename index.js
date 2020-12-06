@@ -5,7 +5,7 @@ if (typeof crypto === 'undefined') {
 
 const Atob = typeof atob !== 'undefined' ? atob : require('atob')
 const Btoa = typeof btoa !== 'undefined' ? btoa : function (str) {
-  return new Buffer(str, 'binary').toString('base64')
+  return new Buffer.from(str, 'binary').toString('base64')
 }
 
 function importKey (KeyAsJson, cb) {
@@ -131,10 +131,6 @@ function hex (buffer) {
   }
   return hexCodes.join('')
 }
-if (module) {
-  module.exports = {generate, sign, verify}
-}
-export {generate, sign, verify}
 
 let getSig
 if (typeof localStorage !== 'undefined') {
@@ -159,4 +155,7 @@ if (typeof localStorage !== 'undefined') {
     console.log("no localStorage")
   }
 }
-export {getSig}
+
+if (module) {
+  module.exports = {generate, sign, verify, getSig}
+}
