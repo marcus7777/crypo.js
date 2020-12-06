@@ -156,6 +156,6 @@ if (typeof localStorage !== 'undefined') {
   }
 }
 
-if (module) {
+if (typeof module !== "undefined") {
   module.exports = {generate, sign, verify, getSig}
 }
