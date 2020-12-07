@@ -97,6 +97,7 @@ function generate (privateKeyCB, publicKeyCB) {
     console.error(e)
   })
 }
+
 function verify (string, signature, publicKey, cb = console.log) {
   let data = str2ab(string)
   importKey(publicKey, function (key) {
